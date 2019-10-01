@@ -80,11 +80,9 @@ load("../merged_temporal_contiguity_data.RData")
 
 # Introduction
 
-Imagine being stranded on an alien planet, where you encounter an extraterrestrial gesticulating and emitting sounds.
-This creature seems to be trying to communicate with you, and you decide your survival may depend on learning what they are talking about.
-After producing a wide variety of sounds and gestures, the alien ...
-Nonetheless, it is unclear to you exactly which aspect of the scene the alien is referring to. 
-You struggle to disambiguate which sounds (words) refer to which referents, but you have trouble remembering any but the most recent and frequent words, and most often pointed to referents. 
+Animal learning is a famously historical process: the order and spacing of experienced events influences the learned behaviors in a variety of well-studied procedures such as blocking, highlighting, conditioning, extinction, counterconditioning, and more [BrooksBoutton1993].
+Studies of human learning and memory have also demonstrated a wide range of order dependencies, in domains ranging from causal learning [Alvarado2006] to 
+
 
 Such cross-situational learning [@Gleitman1990] does not even rely on every correct pairing appearing more frequently than others, since learners employ a mutual exclusivity bias--one word for each object, demonstrated in toddlers [@Markman1988]--to effectively infer word-object mappings that are completely correlated with other pairs [@Kachergis2012]. 
 
