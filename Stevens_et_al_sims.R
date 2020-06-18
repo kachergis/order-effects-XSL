@@ -22,6 +22,7 @@ aaappp = read.table("KoehneTrueswellGleitman2013-aaappp.txt", header=T, sep='\t'
 apapap = read.table("KoehneTrueswellGleitman2013-apapap.txt", header=T, sep='\t') 
 papapa = read.table("KoehneTrueswellGleitman2013-papapa.txt", header=T, sep='\t') 
 
+require(DEoptim)
 
 # for specific order format: w o o o 
 coocs <- function(ord) { 
@@ -39,6 +40,9 @@ coocs(pppaaa)
 coocs(aaappp)
 coocs(apapap)
 coocs(papapa)
+
+library(plotrix)
+heatmap(coocs(pppaaa)[8:1,], Rowv=NA, Colv=NA, labRow=8:1) # all orders look the same
 
 source("models/model_1x4.R")
 # Conditions PPPAAA: 34.4%; PAPAPA = 27.3% 
@@ -82,7 +86,7 @@ best <- DEoptim(fn=evalSSE, hum_perf=exp1_hum_perf, lower=c(.001, .1, .7), upper
 # account because all conditions should have been above chance independent of presentation order.
 
 # best fit: SSE = 0.001710  par = c(0.481103, 6.753934, 0.806177)
-evalSSE( c(0.481103, 6.753934, 0.806177), exp1_hum_perf, verbose=T)
+evalSSE( c(0.481103, 6.753934, 0.806177), exp1_hum_perf, verbose=T) 
 # 0.1907993 0.2381775 0.2660204 0.3135700
 
 # Fit Exp2

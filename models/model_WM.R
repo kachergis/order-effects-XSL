@@ -4,6 +4,32 @@
 # trial and separate those from the new ones on this trial (do not cross-associate groups)
 # August 5, 2011
 
+shannon.entropy <- function(p) {
+  if (min(p) < 0 || sum(p) <= 0)
+    return(NA)
+  p.norm <- p[p>0]/sum(p)
+  -sum(log2(p.norm)*p.norm)
+}
+
+
+update_known <- function(m, tr) {
+  startval = .01
+  
+  for(i in tr) {
+    for(c in 1:dim(m)[2]) {
+      if(sum(m[,c]>0) & m[i,c]==0) {
+        m[i,c] = startval
+        m[c,i] = startval
+      }
+    }
+    for(j in tr) {
+      if(m[i,j]==0) m[i,j] = startval
+      if(m[j,i]==0) m[j,i] = startval
+    }
+  }
+  return(m)
+}
+
 model <- function(params, ord=c(), ord_name="", name="model", save_traj=FALSE) {
 	X <- params[1] # associative weight to distribute
 	B <- params[2] # weighting of uncertainty vs. familiarity

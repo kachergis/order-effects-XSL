@@ -27,7 +27,7 @@ update_known <- function(m, tr) {
 	}
 
 
-model <- function(params, ord, ord_name="", reps=1, name="model", print_matrix=FALSE) {
+model <- function(params, ord, start_matrix=c(), ord_name="", reps=1, name="model", print_matrix=FALSE) {
 	X <- params[1] # associative weight to distribute
 	B <- params[2] # weighting of uncertainty vs. familiarity
 	C <- params[3] # decay
@@ -37,7 +37,14 @@ model <- function(params, ord, ord_name="", reps=1, name="model", print_matrix=F
 	compScore = rep(0, nrow(ord))
 	ppt = ncol(ord) # pairs per trial
 	mean_ent = c()
-	m <- matrix(0, voc_sz, voc_sz) # association matrix
+	
+	
+	if(length(start_matrix)==0) { # no prior experience (e.g., pre-trained associations)
+	  m <- matrix(0, voc_sz, voc_sz) # empty association matrix
+	} else {
+	  m = start_matrix # pretrained association
+	}
+	
 	# training
 	for(rep in 1:reps) { # for trajectory experiments, train multiple times
 	  for(t in 1:nrow(ord)) { 

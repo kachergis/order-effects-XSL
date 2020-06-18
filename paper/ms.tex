@@ -113,19 +113,18 @@ hazy indefinite words outline
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-In order to learn a language, learners must rely on others to occasionally mention objects in their shared environment.
-However, it may not be clear to the learner exactly which object a speaker is naming at any given moment.
-The learner may disambiguate which words refer to which objects if names co-occur most frequently with their intended referents, and the learner remembers frequent word-object pairings.
-Such cross-situational learning (Gleitman, 1990) does not even rely on every correct pairing appearing more frequently than others, since learners employ a mutual exclusivity bias---one word for each object, demonstrated in toddlers (Markman \& Wachtel, 1988)--to effectively infer word-object mappings that are completely correlated with other pairs ({\textbf{???}}).
+Animal learning is a famously historical process: the order and spacing of experienced events influences the learned behaviors in a variety of well-studied procedures such as blocking, highlighting, conditioning, extinction, counterconditioning, and more {[}BrooksBoutton1993{]}.
+Studies of human learning and memory have also demonstrated a wide range of order dependencies, in domains ranging from causal learning {[}Alvarado2006{]} to
 
-In the cross-situational word learning paradigm (Smith \& Yu, 2008), a learner acquires word meanings by tracking the co-occurrences words and objects across situations containing several words and objects.
-For example, adults are presented with a series of study trials, each displaying four uncommon objects (e.g., an abstract sculpture) while four pseudowords are spoken (e.g., \enquote{manu}, \enquote{bosa}).
-Although each pseudoword refers to an onscreen object, the intended referent is not indicated, leaving the correct pairings on each trial quite ambiguous.
-With this trial configuration, when given a total of 18 word-object pairs across 27 trials---yielding 6 repetitions per pair---the average adult learner adult learner chooses the correct object for each word from 3 other objects (i.e., 4AFC testing) for 9.5 of the 18 pairs.
+Such cross-situational learning ({\textbf{???}}) does not even rely on every correct pairing appearing more frequently than others, since learners employ a mutual exclusivity bias--one word for each object, demonstrated in toddlers (Markman \& Wachtel, 1988)--to effectively infer word-object mappings that are completely correlated with other pairs ({\textbf{???}}).
+
+In the cross-situational word learning paradigm (Smith \& Yu, 2008), learners attempt to discern word meanings while experiencing a series of situations, each presenting a few (spoken) words and objects.
+For example, learners may see a display containing four unusual objects (e.g., abstract sculptures and specialized tools) while four nonce words are heard (e.g., \enquote{manu}, \enquote{bosa}, \enquote{regli}, \enquote{stigson}).
+Although each nonce word is meant to refer to an onscreen object, the intended referent is not indicated, leaving the correct pairings on each trial ambiguous to the learner.
 
 Given perfect knowledge of which words and objects appeared on each trial, and perfect discrimination among the words and objects, myriad simple algorithms can perform this task.
 For example, maintaining a word x object co-occurrence count matrix and choosing the most frequent object for each word guarantees flawless performance.
-However, such a strategy requires accurately storing and retrieving an 18x18 matrix of counts--an unlikely feat for human memory.
+However, such a strategy requires accurately storing and retrieving a large matrix of counts--an unlikely feat for human memory.
 Instead, human learners likely select and store a subset of the word-object co-occurrences on each trial, perhaps on the basis of what is noisily remembered from preceding trials.
 For example, if words \{w1, w2, w3, w4\} and objects \{o1, o2, o3, o4\} appeared on the first trial, and \{w1, w5, w6, w7\} and \{o1, o5, o6, o7\} were presented on the next trial, learners may realize that pair 1 (i.e., w1-o1) was repeated, and devote more attention to storing this association than to the still-ambiguous word-object pairings (i.e., pairs 5-7).
 Assuming that influences from such trial-to-trial contiguity are present, Yu and Smith (2007) and many other previous studies {[}XXX{]} did not allow such contiguities: pairs were forbidden from appearing in consecutive trials.
@@ -264,6 +263,9 @@ This article includes data from a paper that appeared in the Proceedings of the 
 \hypertarget{refs}{}
 \leavevmode\hypertarget{ref-Kachergis2016}{}%
 Kachergis, G., Yu, C., \& Shiffrin, R. M. (2016). A bootstrapping model of frequency and contextual diversity effects in word learning. \emph{Cognitive Science}. \url{http://doi.org/10.1111/cogs.12353}
+
+\leavevmode\hypertarget{ref-Markman1988}{}%
+Markman, E. M., \& Wachtel, G. F. (1988). Children's use of mutual exclusivity to constrain the meanings of words. \emph{Cognitive Psychology}, \emph{20}, 121--157.
 
 \leavevmode\hypertarget{ref-Smith2008}{}%
 Smith, L., \& Yu, C. (2008). Infants rapidly learn word-referent mappings via cross-situational statistics. \emph{Cognition}, \emph{106}, 1558--1568.

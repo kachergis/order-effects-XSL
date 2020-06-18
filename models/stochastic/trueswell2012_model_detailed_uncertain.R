@@ -69,3 +69,9 @@ model <- function(params, ord=c(), ord_name="", reps=1, K=NA, verbose=F) {
 	want = list(perf=resp_prob, matrix=m, compScore=compScore) # , traj=traj
 	return(want)
 }
+
+#start_t <- Sys.time()
+#simulate_subjects(orig, c(.2, .3))
+#end_t <- Sys.time()
+
+#end_t - start_t # 2.4s

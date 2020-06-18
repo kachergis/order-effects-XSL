@@ -67,6 +67,7 @@ library(lme4)
 library(lmerTest)
 library(tidyboot)
 library(knitr)
+library(rstanarm)
 #source("multiplot.R")
 
 select <- dplyr::select # masked by MASS
@@ -76,6 +77,8 @@ theme_set(theme_few())
 
 ```{r load_data, include=FALSE}
 load("../merged_temporal_contiguity_data.RData")
+load("../temporal_contiguity_model_ALL_fits.RData") # models fit per condition
+load("../exp1n2_fitted_models_item_perf.RData") 
 ```
 
 # Introduction
@@ -141,7 +144,7 @@ Such segregation of a large set with many possible pairings (i.e., 4×4 = 16) in
 ### Participants
 
 Participants were undergraduates at Indiana University who received course credit for participating. 
-There were 76 participants in condition SR = 0--a control condition used in many experiments; 36 in conditions SR = \{.33, .66, 1.0, and 1.41\}; and 31 in condition SR = 2.04. 
+There were 76 participants in condition SR = 0--a control condition used in many experiments; 36 in conditions SR = {.33, .66, 1.0, and 1.41}; and 31 in condition SR = 2.04. 
 
 ### Stimuli
 
@@ -166,7 +169,7 @@ After training, their knowledge was assessed using 18-alternative forced choice 
 
 ## Results
 
-```{r exp1, include=FALSE}
+```{r exp1-analysis, include=FALSE}
 # Exp1: cond=="tc0" | cond=="x6_1" | cond=="x6_2 | cond=="x6_3" | cond=="x6_4" | cond=="x8_4"
 
 e1i = bdi %>% filter(cond=="tc0" | cond=="x6_1" | cond=="x6_2" | cond=="x6_3" | cond=="x6_4" | cond=="x8_4") 
@@ -186,17 +189,45 @@ summary(glmer(Correct ~ itemSR*condSR + (1|Subject), data=e1i, family=binomial))
 #itemSR         0.37816    0.11320   3.341 0.000836 ***
 #condSR         0.30635    0.15290   2.004 0.045108 *  
 #itemSR:condSR -0.19053    0.08383  -2.273 0.023045 *  
-summary(glmer(Correct ~ itemSRsc*condSRsc + (1|Subject), data=e1i, family=binomial)) # /cond?
-#                  Estimate Std. Error z value Pr(>|z|)    
-#(Intercept)       -0.59176    0.14663  -4.036 5.44e-05 ***
-#itemSRsc           0.28282    0.08084   3.499 0.000468 ***
-#condSRsc           0.06385    0.08669   0.737 0.461415    
-#itemSRsc:condSRsc -0.15798    0.06952  -2.273 0.023050 *  
+
+# want random intercepts per condition and item or not? (actually interested in SR of items and conds)
+fmod = stan_glmer(Correct ~ itemSR*condSR + (1|Subject) + (1|item) + (1|cond), data=e1i, family=binomial)
+summary(fmod) 
+
+mod = stan_glmer(Correct ~ itemSRsc*condSRsc + (1|Subject), data=e1i, family=binomial)
+summary(mod) 
+#                                            mean    sd      2.5%    25%     50%     75%     97.5%
+# itemSRsc                                   0.3     0.1     0.1     0.2     0.3     0.3     0.4
+# condSRsc                                   0.1     0.1    -0.1     0.0     0.1     0.1     0.2
+# itemSRsc:condSRsc                         -0.2     0.1    -0.3    -0.2    -0.2    -0.1     0.0
+#                                        mcse Rhat n_eff
+# (Intercept)                            0.0  1.0   830 
+# itemSRsc                               0.0  1.0  4457 
+# condSRsc                               0.0  1.0  4281 
+# itemSRsc:condSRsc                      0.0  1.0  2537 
 ```
 
-Figure 1 shows the overall performance achieved in each condition of Experiment 1. Increasing the degree of successive repetitions does produce increased performance, as predicted, showing a strong correlation. However, the increases are surprisingly modest relative to what might have been expected a priori. For detailed analysis of each condition, to-be-learned pairs were grouped according to the number of times they had successive repetitions in the sequence (see Table 1). Surprisingly, the relation between performance and SR was often non-monotonic. For example, consider the trial ordering with mean SR = 1.0. In this condition, the non-repeated pairs were learned with 45% accuracy, the pairs that overlapped once were learned with only 30% accuracy, and the pairs that overlapped three times were learned with 66% accuracy. In some other conditions, performance was more or less equal for all degrees of repetition. Only in the two conditions of low SR (SR=.33 and SR=.67) did greater successive repetition confer a modest learning advantage.
+```{r exp1-regression, fig.cap="\\label{fig:exp1-regression}"}
+require(bayesplot)
+pars = c("(Intercept)", "itemSRsc", "condSRsc", "itemSRsc:condSRsc")
+bayesplot_grid(
+  plot(mod, plotfun = "intervals", pars = pars, prob = 0.5, prob_outer = 0.95, point_est = "median") + ggtitle("Marginal Posterior Param. Estimates"),
+  plot(mod, plotfun = "areas", pars = pars, prob = 0.5, prob_outer = 0.95, point_est = "median") + ggtitle("Marginal Posterior Param. Estimates"),
+  grid_args = list(ncol = 2)
+)
 
-```{r fig1-exp1, include=TRUE}
+```
+
+Figure \ref{fig:fig1} shows the overall performance achieved in each condition of Experiment 1. 
+Increasing the degree of successive repetitions does produce increased performance, as predicted, showing a strong correlation. However, the increases are surprisingly modest relative to what might have been expected a priori. 
+For detailed analysis of each condition, to-be-learned pairs were grouped according to the number of times they had successive repetitions in the sequence (see Table \ref{tab1}). 
+Surprisingly, the relation between performance and SR was often non-monotonic. 
+For example, consider the trial ordering with mean SR = 1.0. 
+In this condition, the non-repeated pairs were learned with 45% accuracy, the pairs that overlapped once were learned with only 30% accuracy, and the pairs that overlapped three times were learned with 66% accuracy. 
+In some other conditions, performance was more or less equal for all degrees of repetition. 
+Only in the two conditions of low SR (SR=.33 and SR=.67) did greater successive repetition confer a modest learning advantage.
+
+```{r fig1-exp1, include=TRUE, fig.cap="\\label{fig:fig1} Accuracy (18AFC; chance=.056) for conditions with varying degrees of average successive repetitions (SR). Greater mean SR in a condition tended to improve learning performance, although not as drastically as expected. Error bars are +/-SE."}
 e1 = e1i %>% group_by(cond, item, itemSR, condSR) %>% 
   tidyboot_mean(column = Correct)
 dodge = position_dodge(width=.3)
@@ -206,7 +237,6 @@ ggplot(data=e1, aes(x=itemSR, y=mean, group=condSR, colour=condSR)) +
   geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position=dodge) + # ,position = position_dodge(width = .9)
   geom_hline(yintercept=1/18, linetype="dashed", color="red") 
 ```
-Figure 1: Accuracy (18AFC; chance=.056) for conditions with varying degrees of average successive repetitions (SR). Greater mean SR in a condition tended to improve learning performance, although not as drastically as expected. Error bars are +/-SE.
 
 ```{r exp1-unused-graph, include=F}
 # might instead want to graph performance for repeated vs. nonrepeated pairs per condition
@@ -220,19 +250,24 @@ ggplot(data=e1, aes(x=condSR, y=mean, group=Repeated, colour=Repeated)) +
   geom_hline(yintercept=1/18, linetype="dashed", color="red")
 ```
 
-These results show that learning is increased by increasing the average degree of successive repetitions, even while leaving all within-trial co-occurrence statistics constant. However, based on the detailed analysis in Table 1, it is clear that this learning increase was not simply due to increased learning for successively repeated pairs. For instance, in the SR=1.0 condition, non-repeated pairs were learned better than 1- and 2-repetition pairs. The difficulty of learning a given pair is not solely due to the number of successive repetitions for that pair in a sequence. Perhaps the presence of other repeated pairs interfered with the learning of a given pair. Another relevant factor may be the interaction of spacing and sequential effects: for each case where a pair occurs in successive trials, that pair will appear one fewer time later in training (since each pair only appeared 6 times during training).   
+These results show that learning is increased by increasing the average degree of successive repetitions, even while leaving all within-trial co-occurrence statistics constant. However, based on the detailed analysis in Table \ref{tab1}, it is clear that this learning increase was not simply due to increased learning for successively repeated pairs. For instance, in the SR=1.0 condition, non-repeated pairs were learned better than 1- and 2-repetition pairs. The difficulty of learning a given pair is not solely due to the number of successive repetitions for that pair in a sequence. Perhaps the presence of other repeated pairs interfered with the learning of a given pair. Another relevant factor may be the interaction of spacing and sequential effects: for each case where a pair occurs in successive trials, that pair will appear one fewer time later in training (since each pair only appeared 6 times during training).   
 
 
-
-```{r exp2, echo=FALSE}
-e2 = bdi %>% filter(cond=="tc0" | cond=="x13_1" | cond=="x13_2" | cond=="x13_3") 
-e2 = e2 %>% group_by(cond, itemSR, condSR) %>% 
-  tidyboot_mean(column=Correct)
-ggplot(data=e2, aes(x=condSR, group=itemSR, colour=cond, y=mean)) + 
-  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
-  geom_point(alpha=.8) + theme_bw() + ylim(0,1) + xlab("Item SR") + ylab("Proportion Correct") +
-  geom_hline(yintercept=1/18, linetype="dashed", color="red")
+```{r tab1, echo=FALSE, message=FALSE, warnings=FALSE, results='asis', fig.cap="\\label{tab1} Accuracy for SR groups in each condition of Exp. 1. Per SR group, cells display: accuracy (number of pairs)"}
+tab1 <- "
+|    |  Mean    |  Mean    |  Mean   |  Mean    |  Mean   |
+| SR |  SR=.33  |  SR=.67  |  SR=1   |  SR=1.4  |  SR=2   |
+|----|:--------:|---------:|--------:|---------:|--------:|
+| 0  | .32 (10) | .29  (4) | .45 (2) |    --    | .46 (4) |
+| 1  | .33  (7) | .37 (10) | .30 (7) | .43  (3) | .39 (1) |
+| 2  | .39  (1) | .43  (4) | .40 (7) | .45 (10) | .40 (2) |
+| 3  |    --    |    --    | .66 (2) | .36  (5) | .42 (7) |
+| 4  |    --    |    --    |   --    |    --    | .40 (3) |
+| 5  |    --    |    --    |   --    |    --    | .39 (1) |
+"
+cat(tab1) # output the table in a format good for HTML/PDF/docx conversion
 ```
+
 
 # Experiment 2
 
@@ -241,7 +276,9 @@ Experiment 1 showed that increasing the mean successive repetitions in a trial o
 Importantly, these conditions offer different ways to perform inferences and consequently reduce the degree of ambiguity. For example, consider just two successive trials with one pair only repeated, as in the 1 pair/2 trials condition. The repeated pair may be immediately inferred to be correct, but the remaining six pairs on the two trials remains ambiguous—there are still 9 possible pairings for each of the three remaining words and objects in each trial. For another example, when two pairs are repeated in two successive trials, as in the 2 pairs/2 trials condition, no pairing can be unambiguously inferred. However, overall ambiguity is considerably reduced: If (A B X Y; b a y x) occurred on trial n, and (A B E F; a b e f) occurred on trial n+1, then memory for the preceding trial allows the following inferences: (A, B) and (b, a) must go together, in some pairing; (E, F) and (f, e) must go together, in some pairing; (X, Y) and (y, x) must go together, in some pairing. Thus no pairing can be unambiguously determined, yet the six items on the two trials have only eight possible pairings—a significant reduction of ambiguity. Note that in all of these conditions, the conceivable inferences are reliant upon memory and attention. 
 
 ### Participants
-Participants were undergraduates at Indiana University who received course credit for participating. Twenty-three participants completed only the three SR conditions, and an additional 44 participants completed all conditions.  None had participated in other cross-situational experiments.
+Participants were undergraduates at Indiana University who received course credit for participating. 
+Twenty-three participants completed only the three SR conditions, and an additional 44 participants completed all conditions.  
+None had participated in other cross-situational experiments.
 
 ### Stimuli & Procedure
 
@@ -251,9 +288,55 @@ The sets of pseudowords and referents for Experiment 2, the number of trials, th
 
 Figure 2 displays the overall learning performance for each training condition in Experiment 2. Participants learned significantly more successively repeated pairs (M = .47) than non-repeated pairs (M = .27) in the 1 pair/2 trials condition (paired t(66) = 6.93, p < .001), demonstrating that a single successive repetition boosts learning of that pair. 
 
-Figure 2: Accuracy (18AFC; chance=.056) for the three conditions in Exp. 2, and the TC=0 condition (no overlaps) from Exp. 1 for comparison. Error bars are +/-SE.
+```{r exp2, echo=FALSE, fig.width=3, fig.cap="Figure 2: Accuracy (18AFC; chance=.056) for the three conditions in Exp. 2, and the TC=0 condition (no overlaps) from Exp. 1 for comparison. Error bars are bootstrapped 95% confidence intervals."}
+e2 = bdi %>% filter(cond=="tc0" | cond=="x13_1" | cond=="x13_2" | cond=="x13_3") 
+e2 = e2 %>% group_by(cond, itemSR, condSR) %>% 
+  tidyboot_mean(column=Correct)
+ggplot(data=e2, aes(x=itemSR, group=cond, colour=cond, y=mean)) + # group=condSR, colour=condSR,
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
+  geom_point(alpha=.8) + theme_bw() + ylim(0,1) + xlab("Item SR") + ylab("Proportion Correct") +
+  geom_hline(yintercept=1/18, linetype="dashed", color="red")
+```
 
 However, performance for repeated pairs (M = .40) in the 1 pair/3 trials condition was not significantly greater than for the non-repeated pairs (M = .36, paired t(62) = 1.31, p > .05). Instead, a higher proportion of non-repeated pairs were learned in the 1 pair/3 trials condition than in the 1 pair/2 trials condition (paired t(62) = 3.24, p < .01). Thus, although there was no SR advantage within the 1 pair/3 trials condition, more non-repeated pairs were learned instead, and overall pair learning in this condition (M = .37) was not significantly different than overall learning in the 1 pair/2 trials condition (M = .33, paired t(62) = 0.98, p > .05). Although each of the conditions with some variety of successive repetition trended toward greater overall performance than the condition with no repetitions, none were significantly greater. 
+
+# Models
+
+```{r model-fits}
+# see model_testing.R
+#load("../temporal_contiguity_model_fits.RData") 
+load("../tc_trial_orders.RData")
+names(mod)
+# e1conds = c("tc0","x6_1","x6_2","x6_3","x6_4")
+
+hum = bdi %>% group_by(cond, item, itemSR, condSR) %>% 
+  filter(cond!="x8_1") %>%
+  summarize(Human = mean(Correct)) 
+#hum$model = "Human"
+
+#mod = rbind(mod, hum[,c("model","item","cond","accuracy")])
+mh = left_join(mod, hum, by=c("cond","item"))
+
+library(GGally)
+ggpairs(mh, aes(colour=model, alpha = 0.4), columns=c("Human","accuracy"))
+
+ggplot(mh, aes(x=Human, y=accuracy, color=cond)) + facet_wrap(. ~ model) + 
+  geom_point() + geom_abline(slop=1) + ylim(0,1) + xlim(0,1)
+for(m in unique(mh$model)) {
+  print(paste(round(cor(subset(mh, model==m)$accuracy, subset(mh, model==m)$Human),2), m))
+}
+
+e12 = bdi %>% filter(cond!="x8_1") %>%
+  group_by(cond, item, itemSR, condSR) %>% 
+  tidyboot_mean(column = Correct)
+dodge = position_dodge(width=.3)
+ggplot(data=e12, aes(x=itemSR, y=mean, group=cond, colour=cond)) + 
+  theme_bw() + ylim(0,1) + xlab("Item SR") + ylab("Proportion Correct") + 
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position=dodge) + 
+  geom_line(position=dodge) + geom_point(position=dodge) + 
+  geom_hline(yintercept=1/18, linetype="dashed", color="red") 
+
+```
 
 # General Discussion
 
